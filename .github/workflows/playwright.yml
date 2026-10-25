@@ -1,0 +1,45 @@
+name: playwright
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      CI: 'true'
+      SF_LIGHTNING_URL: ${{ secrets.SF_LIGHTNING_URL }}
+      SF_USERNAME: ${{ secrets.SF_USERNAME }}
+      SF_PASSWORD: ${{ secrets.SF_PASSWORD }}
+      MAIL_USER: ${{ secrets.MAIL_USER }}
+      MAIL_APP_PASSWORD: ${{ secrets.MAIL_APP_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npx playwright install --with-deps chromium webkit
+
+      # No cached session on a fresh runner, so the setup project will hit the email verification step
+      # and pull the code from the mailbox. That is exactly the case the framework is built for.
+      - name: Run suite (chromium full + webkit smoke)
+        run: npx playwright test --project=chromium --project=webkit-smoke
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+            logs/
+          retention-days: 14
