@@ -16,8 +16,11 @@
   "devDependencies": {
     "@faker-js/faker": "^9.9.0",
     "@playwright/test": "^1.56.0",
+    "@types/mailparser": "^3.4.5",
     "@types/node": "^22.10.0",
     "dotenv": "^16.4.5",
+    "imapflow": "^1.0.164",
+    "mailparser": "^3.7.1",
     "typescript": "^5.6.0"
   }
 }
