@@ -1,0 +1,23 @@
+{
+  "name": "sf-qa-automation",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Playwright + TypeScript UI automation for Salesforce CRM (Lead -> Opportunity conversion)",
+  "scripts": {
+    "test": "playwright test",
+    "test:chromium": "playwright test --project=chromium",
+    "test:smoke": "playwright test --project=chromium --project=webkit-smoke --grep @smoke",
+    "test:headed": "playwright test --project=chromium --headed",
+    "test:fresh-login": "playwright test --project=fresh-login --workers=1",
+    "signup:fill": "SF_SIGNUP=1 playwright test tests/signup.spec.ts --project=signup --headed",
+    "report": "playwright show-report",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^9.9.0",
+    "@playwright/test": "^1.56.0",
+    "@types/node": "^22.10.0",
+    "dotenv": "^16.4.5",
+    "typescript": "^5.6.0"
+  }
+}

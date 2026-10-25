@@ -1,0 +1,10 @@
+node_modules/
+.env
+auth/*.json
+!auth/.gitkeep
+playwright-report/
+test-results/
+logs/
+blob-report/
+*.log
+.DS_Store
