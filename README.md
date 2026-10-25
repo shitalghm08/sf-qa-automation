@@ -133,7 +133,7 @@ Every spec is written with `test.step(...)`, so the report reads as a list of wh
 
 **Locators.** Role + accessible name wherever possible, then Salesforce's own stable hooks (`data-target-selection-name="sfdc:RecordField.Lead.Company"` for detail fields, `data-label` on App Launcher tiles). Nothing relies on generated ids or css class chains. Playwright already looks through open shadow roots, so most Lightning components work with plain role locators; the places where that isn't enough are explained in NOTES.md (Part C).
 
-**Waiting.** No fixed sleeps anywhere. Everything is either a web-first assertion, `waitForURL`, `waitForResponse`, or a race between the possible outcomes (e.g. after clicking Save: saved / duplicate alert / validation errors).
+**Waiting.** No fixed sleeps in any UI interaction (the only timed delay in the whole repo is the poll interval while waiting for the verification mail). Everything is either a web-first assertion, `waitForURL`, `waitForResponse`, or a race between the possible outcomes (e.g. after clicking Save: saved / duplicate alert / validation errors).
 
 **Config.** Org specific values (lead status names, expected opportunity stage, app name) are env vars, not constants in the tests.
 
