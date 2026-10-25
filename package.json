@@ -8,7 +8,7 @@
     "test:chromium": "playwright test --project=chromium",
     "test:smoke": "playwright test --project=chromium --project=webkit-smoke --grep @smoke",
     "test:headed": "playwright test --project=chromium --headed",
-    "test:fresh-login": "playwright test --project=fresh-login --workers=1",
+    "test:fresh-login": "RUN_FRESH_LOGIN=1 playwright test --project=fresh-login --workers=1",
     "signup:fill": "SF_SIGNUP=1 playwright test tests/signup.spec.ts --project=signup --headed",
     "report": "playwright show-report",
     "typecheck": "tsc --noEmit"
