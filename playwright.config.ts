@@ -50,6 +50,9 @@ export default defineConfig({
     },
     {
       name: 'setup-webkit',
+      // chained on purpose: two logins at the same time would both ask for a code and
+      // the mailbox reader could hand one browser the other browser's code
+      dependencies: ['setup-chromium'],
       testMatch: /auth\.setup\.ts/,
       use: { ...devices['Desktop Safari'], ...desktop },
     },
