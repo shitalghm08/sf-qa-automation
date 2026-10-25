@@ -1,5 +1,6 @@
 import { env } from '../src/config/env';
 import { expect, test } from '../src/fixtures';
+import { assertConversionResponse } from '../src/api/conversionAssertions';
 import { LinkMode } from '../src/pages/LeadConvertPage';
 import { buildLead, fullName } from '../src/utils/randomData';
 
@@ -67,7 +68,16 @@ test.describe('Part B - lead to opportunity conversion', () => {
         expect(await convert.linkContact(person), 'contact branch').toBe(expectedContactMode);
       });
 
-      const { result } = await test.step('convert', async () => convert.submit());
+      const { result, call } = await test.step('convert', async () => convert.submit());
+
+      await test.step('backend response agrees with what the ui shows (API / response validation)', async () => {
+        await testInfo.attach('convert-response.json', { body: JSON.stringify(call.json, null, 2), contentType: 'application/json' });
+        await testInfo.attach('convert-request.txt', { body: call.requestBody.slice(0, 4000), contentType: 'text/plain' });
+
+        const paths = assertConversionResponse(call, result);
+        // where each id was found, so NOTES.md can pin the real json paths down
+        await testInfo.attach('convert-json-paths.json', { body: JSON.stringify(paths, null, 2), contentType: 'application/json' });
+      });
 
       await test.step('opportunity was created', async () => {
         expect(result.opportunityId).toMatch(/^006[A-Za-z0-9]{15}$/);
