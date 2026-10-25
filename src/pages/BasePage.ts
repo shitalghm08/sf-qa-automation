@@ -63,6 +63,24 @@ export abstract class BasePage {
     await this.page.getByRole('menuitem', { name, exact: true }).click();
   }
 
+  /**
+   * A field on a record page (detail view). Primary hook is the field api name that
+   * lightning stamps on the wrapper (data-target-selection-name="sfdc:RecordField.Lead.Company"),
+   * which survives layout changes and translations. The label attribute is the fallback.
+   */
+  recordField(objectApiName: string, apiNames: string[], label: string): Locator {
+    const byApi = apiNames
+      .map((a) => `[data-target-selection-name="sfdc:RecordField.${objectApiName}.${a}"]`)
+      .join(', ');
+    const byLabel = `records-record-layout-item[field-label="${label}"]`;
+    return this.page.locator(`${byApi}, ${byLabel}`).first();
+  }
+
+  /** the modal that is currently on top */
+  activeDialog(): Locator {
+    return this.page.getByRole('dialog').filter({ visible: true }).last();
+  }
+
   /** pull the 18 char record id out of /lightning/r/<Object>/<id>/view */
   async recordIdFromUrl(objectApiName: string, idPrefix: string): Promise<string> {
     const re = new RegExp(`/lightning/r/${objectApiName}/(${idPrefix}[A-Za-z0-9]{15})/view`);
