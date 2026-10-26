@@ -11,7 +11,7 @@ function required(name: string): string {
   const v = process.env[name];
   if (!v || !v.trim()) {
     throw new Error(
-      `Missing env var ${name}. Copy .env.example to .env and fill it in (see README, "Setup").`,
+      `Missing env var ${name}. Create a .env file in the project root (see README, "Setup", step 3).`,
     );
   }
   return v.trim();
@@ -26,7 +26,13 @@ export const env = {
   // --- org / login ---
   get lightningUrl() {
     // e.g. https://orgfarm-abc123-dev-ed.develop.lightning.force.com (no trailing slash)
-    return required('SF_LIGHTNING_URL').replace(/\/+$/, '');
+    // only the origin matters (baseURL), so a pasted browser url with a path still works
+    const raw = required('SF_LIGHTNING_URL');
+    try {
+      return new URL(raw).origin;
+    } catch {
+      throw new Error(`SF_LIGHTNING_URL is not a valid url: "${raw}"`);
+    }
   },
   get loginUrl() {
     return optional('SF_LOGIN_URL', 'https://login.salesforce.com').replace(/\/+$/, '');
@@ -57,10 +63,10 @@ export const env = {
     return optional('SF_SALES_APP_NAME', 'Sales');
   },
   get leadStatusInitial() {
-    return optional('LEAD_STATUS_INITIAL', 'Unqualified');
+    return optional('LEAD_STATUS_INITIAL', 'Open - Not Contacted');
   },
   get leadStatusUpdated() {
-    return optional('LEAD_STATUS_UPDATED', 'Qualified');
+    return optional('LEAD_STATUS_UPDATED', 'Working - Contacted');
   },
   get expectedOppStage() {
     // first stage of the default sales process; change it if your org differs
