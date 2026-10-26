@@ -9,8 +9,8 @@
     "test:chromium": "playwright test --project=chromium",
     "test:smoke": "playwright test --project=chromium --project=webkit-smoke --grep @smoke",
     "test:headed": "playwright test --project=chromium --headed",
-    "test:fresh-login": "RUN_FRESH_LOGIN=1 playwright test --project=fresh-login --workers=1",
-    "signup:fill": "SF_SIGNUP=1 playwright test tests/signup.spec.ts --project=signup --headed",
+    "test:fresh-login": "cross-env RUN_FRESH_LOGIN=1 playwright test --project=fresh-login --workers=1",
+    "signup:fill": "cross-env SF_SIGNUP=1 playwright test tests/signup.spec.ts --project=signup --headed",
     "report": "playwright show-report",
     "typecheck": "tsc --noEmit"
   },
@@ -19,6 +19,7 @@
     "@playwright/test": "^1.56.0",
     "@types/mailparser": "^3.4.5",
     "@types/node": "^22.10.0",
+    "cross-env": "^7.0.3",
     "dotenv": "^16.4.5",
     "imapflow": "^1.0.164",
     "mailparser": "^3.7.1",
