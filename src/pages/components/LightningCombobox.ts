@@ -1,4 +1,4 @@
-import { Locator } from '@playwright/test';
+import { expect, Locator } from '@playwright/test';
 import { esc, looseLabel } from '../BasePage';
 
 /**
@@ -27,8 +27,19 @@ export class LightningCombobox {
 
   async select(label: string, value: string): Promise<void> {
     const trigger = this.trigger(label);
-    await trigger.scrollIntoViewIfNeeded();
-    await trigger.click();
+    // Centre it in the modal. Playwright scrolling the option into view later would scroll the
+    // modal body, and lightning closes the dropdown when that happens (picklists near the footer).
+    await trigger.evaluate((el) => el.scrollIntoView({ block: 'center' }));
+
+    // a default value that is already the wanted one needs no dropdown at all
+    const shown = (await trigger.innerText().catch(() => '')).replace(/\s+/g, ' ').trim();
+    if (shown.toLowerCase() === value.toLowerCase()) return;
+
+    // clicking an open picklist closes it, so only click while it is closed and confirm it opened
+    await expect(async () => {
+      if ((await trigger.getAttribute('aria-expanded')) !== 'true') await trigger.click();
+      await expect(trigger).toHaveAttribute('aria-expanded', 'true', { timeout: 2_000 });
+    }).toPass({ timeout: 10_000 });
 
     const opt = this.option(value);
     try {
