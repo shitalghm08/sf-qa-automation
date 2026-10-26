@@ -8,6 +8,11 @@ if (!process.env.TEST_SEED) process.env.TEST_SEED = String(Math.floor(Math.rando
 if (!process.env.TEST_WORKER_INDEX) console.log(`TEST_SEED=${process.env.TEST_SEED}`);
 
 const isCI = !!process.env.CI;
+
+// What to keep for each test. The default keeps a screenshot, a video and a trace for passing tests as
+// well as failing ones, so every run can be looked at afterwards. ARTIFACTS=failures keeps only what a
+// failure needs, which is faster and much smaller (use it for quick local runs).
+const keepAll = (process.env.ARTIFACTS ?? 'all') !== 'failures';
 const baseURL = (process.env.SF_LIGHTNING_URL ?? 'https://set-SF_LIGHTNING_URL-in-env.invalid').replace(/\/+$/, '');
 
 // tests that should never run as part of the normal authenticated projects
@@ -33,6 +38,8 @@ export default defineConfig({
     ['html', { outputFolder: 'playwright-report', open: 'never' }],
     ['json', { outputFile: 'test-results/report.json' }],
     ['junit', { outputFile: 'test-results/junit.xml' }],
+    // one file per run in logs/runs/, so the data of earlier runs survives the next run
+    ['./src/reporters/runData.ts'],
   ],
 
   use: {
@@ -41,9 +48,9 @@ export default defineConfig({
     timezoneId: 'Asia/Singapore',
     actionTimeout: 15_000,
     navigationTimeout: 45_000,
-    trace: 'on-first-retry',
-    screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
+    trace: keepAll ? 'on' : 'on-first-retry',
+    screenshot: keepAll ? 'on' : 'only-on-failure',
+    video: keepAll ? 'on' : 'retain-on-failure',
   },
 
   projects: [

@@ -7,6 +7,9 @@ import { getLogger } from '../src/utils/logger';
 
 const log = getLogger('auth.setup');
 
+// A trace records what is typed and the request bodies, which would put the password in it
+setup.use({ trace: 'off' });
+
 /**
  * Is the cached session still usable?  Checked by actually opening the org with
  * it - file age alone proves nothing (password reset, admin killed the session,

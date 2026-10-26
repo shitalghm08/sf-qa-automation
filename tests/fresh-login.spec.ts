@@ -12,6 +12,9 @@ import { LoginPage } from '../src/pages/LoginPage';
  */
 test.skip(!process.env.RUN_FRESH_LOGIN, 'opt-in: use `npm run test:fresh-login`');
 
+// A trace records what is typed and the request bodies, which would put the password and the code in it
+test.use({ trace: 'off' });
+
 test('fresh browser login (with email verification when asked) and session reuse', async ({ page, browser }, testInfo) => {
   const stateFile = path.resolve(__dirname, '../auth/state.fresh-login.json');
 
