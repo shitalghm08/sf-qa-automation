@@ -14,7 +14,11 @@ export class LoginPage extends BasePage {
     return this.page.locator('#password');
   }
   private get loginButton(): Locator {
-    return this.page.locator('#Login');
+    return this.page.locator('#Login').or(this.page.getByRole('button', { name: /^log in$/i })).first();
+  }
+  // username-first login pages: the password only appears after this first click
+  private get continueButton(): Locator {
+    return this.page.getByRole('button', { name: /^(log in|continue|next)$/i }).first();
   }
   private get errorBanner(): Locator {
     return this.page.locator('#error').filter({ visible: true });
@@ -37,6 +41,11 @@ export class LoginPage extends BasePage {
     await this.page.goto(`${env.loginUrl}/`, { waitUntil: 'domcontentloaded' });
 
     await this.username.fill(username);
+    // some orgs ask for the username first and only then show the password field
+    if (!(await this.password.isVisible())) {
+      this.log.info('username-first login page, continuing to the password step');
+      await this.continueButton.click();
+    }
     await this.password.fill(password);
 
     // the code mail is triggered by this click, so this is the earliest it can exist
@@ -47,7 +56,7 @@ export class LoginPage extends BasePage {
     let usedVerification = false;
 
     if (outcome === 'error') {
-      const msg = (await this.errorBanner.innerText()).trim();
+      const msg = (await this.errorBanner.innerText()).trim() || 'no message shown on the page';
       throw new Error(`Salesforce rejected the login: "${msg}"`);
     }
 
