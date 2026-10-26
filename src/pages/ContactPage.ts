@@ -9,6 +9,7 @@ export class ContactPage extends BasePage {
   /** a contact's Account Name field is a link, its href carries the account id */
   async expectLinkedToAccount(contactId: string, accountId: string, accountName: string): Promise<void> {
     await this.openRecord(contactId);
+    await this.openDetailsTab();
     const account = this.recordField('Contact', ['AccountId', 'Account'], 'Account Name');
     await expect(account).toContainText(accountName);
     await expect(account.getByRole('link').first()).toHaveAttribute('href', new RegExp(accountId));

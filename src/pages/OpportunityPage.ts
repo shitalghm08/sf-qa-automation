@@ -10,12 +10,6 @@ export class OpportunityPage extends BasePage {
     await this.open(`/lightning/r/Opportunity/${id}/view`);
   }
 
-  async openDetailsTab(): Promise<void> {
-    const tab = this.page.getByRole('tab', { name: 'Details', exact: true });
-    if ((await tab.getAttribute('aria-selected')) !== 'true') await tab.click();
-    await this.waitForLightningIdle();
-  }
-
   async expectKeyValues(expected: { ownerName: string; stage: string; accountName: string; opportunityNameContains: string }): Promise<void> {
     await this.openDetailsTab();
 
@@ -35,7 +29,20 @@ export class OpportunityPage extends BasePage {
   async expectContactRole(contactFullName: string): Promise<void> {
     await this.page.getByRole('tab', { name: 'Related', exact: true }).click();
     const link = this.page.getByRole('link', { name: contactFullName }).first();
+    try {
+      // related lists load lazily, so give the list time to render
+      await link.waitFor({ state: 'visible', timeout: 15_000 });
+    } catch (err) {
+      const lists = await this.page
+        .locator('article h2, lst-related-list-container h2, lightning-card h2')
+        .allInnerTexts()
+        .catch(() => [] as string[]);
+      const seen = [...new Set(lists.map((t) => t.replace(/\s+/g, ' ').trim()).filter(Boolean))];
+      throw new Error(
+        `Contact "${contactFullName}" not found on the Related tab. Related lists shown: [${seen.join(' | ')}]. ` +
+          `Original error: ${(err as Error).message}`,
+      );
+    }
     await link.scrollIntoViewIfNeeded();
-    await expect(link).toBeVisible();
   }
 }
