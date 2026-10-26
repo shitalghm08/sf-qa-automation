@@ -1,10 +1,12 @@
 name: playwright
 
+# Manual only: it needs the five repository secrets below (Settings > Secrets and variables > Actions).
+# To run it on every push / pull request, add `push:` and `pull_request:` back here once they are set.
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-  pull_request:
+ #push:
+   #branches: [main]
+ #pull_request:
 
 jobs:
   e2e:
