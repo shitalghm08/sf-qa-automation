@@ -48,6 +48,18 @@ export class HomePage extends BasePage {
       .locator(`one-app-launcher-menu-item a[data-label="${appName}"]`)
       .or(this.page.getByRole('link', { name: appName, exact: true }))
       .first();
+
+    try {
+      await tile.waitFor({ state: 'visible', timeout: 10_000 });
+    } catch {
+      const labels = await this.page.locator('one-app-launcher-menu-item a[data-label]').evaluateAll((els) =>
+        els.map((el) => el.getAttribute('data-label')),
+      );
+      throw new Error(
+        `App "${appName}" not found in the App Launcher. Visible apps: ${labels.join(', ') || '(none)'}. ` +
+          'Check SF_SALES_APP_NAME in .env.',
+      );
+    }
     await tile.click();
 
     await this.waitForLightningIdle();
