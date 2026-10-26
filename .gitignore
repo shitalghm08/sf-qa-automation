@@ -8,3 +8,7 @@ logs/
 blob-report/
 *.log
 .DS_Store
+ignore/
+runs/
+.vscode/
+requirement/
