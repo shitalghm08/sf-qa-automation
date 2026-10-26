@@ -3,50 +3,60 @@ import { expect, test } from '../src/fixtures';
 import { assertConversionResponse } from '../src/api/conversionAssertions';
 import { LinkMode } from '../src/pages/LeadConvertPage';
 import { buildLead, fullName } from '../src/utils/randomData';
+import { readSharedIds, searchPatienceMs, SHARED } from '../src/utils/sharedData';
 
 /**
  * Lead -> Opportunity conversion, once per branch of the account / contact check.
  *
  * The brief wants the modal to look for existing records first and only create new
- * ones when nothing is there. To prove each branch really fires, every scenario seeds
- * exactly the records it needs and then asserts the modal picked the matching branch.
- * If the modal and the seed disagree the test fails at the link step, not three
+ * ones when nothing is there. To prove each branch really fires, every scenario sets up
+ * exactly what it needs and then asserts the modal picked the matching branch.
+ * If the modal and the data disagree the test fails at the link step, not three
  * assertions later with a confusing message.
+ *
+ * "Exists" scenarios link to ONE shared Account / Contact that the seed-shared project creates
+ * once and keeps (src/utils/sharedData.ts): the modal finds records through the search index,
+ * and a record created seconds ago can take minutes to show up there. The lead is given the
+ * shared record's name, so the modal's search finds it.
  */
 interface Scenario {
   title: string;
-  seedAccount: boolean;
-  seedContact: boolean;
+  existingAccount: boolean;
+  existingContact: boolean;
 }
 
 const scenarios: Scenario[] = [
-  { title: 'neither account nor contact exists, both get created', seedAccount: false, seedContact: false },
-  { title: 'account exists, linked; contact gets created', seedAccount: true, seedContact: false },
-  { title: 'account and contact exist, both linked', seedAccount: true, seedContact: true },
+  { title: 'neither account nor contact exists, both get created', existingAccount: false, existingContact: false },
+  { title: 'account exists, linked; contact gets created', existingAccount: true, existingContact: false },
+  { title: 'account and contact exist, both linked', existingAccount: true, existingContact: true },
 ];
 
 test.describe('Part B - lead to opportunity conversion', () => {
+  // only the very first run, with brand new shared records, may wait minutes for the search index
+  test.describe.configure({ timeout: 480_000 });
+
   for (const sc of scenarios) {
-    test(`convert lead: ${sc.title}`, async ({ home, leads, convert, opportunities, contacts, seeder }, testInfo) => {
-      const lead = buildLead();
-      const person = fullName(lead);
-      const expectedAccountMode: LinkMode = sc.seedAccount ? 'existing' : 'new';
-      const expectedContactMode: LinkMode = sc.seedContact ? 'existing' : 'new';
+    test(`convert lead: ${sc.title}`, async ({ home, leads, convert, opportunities, contacts }, testInfo) => {
+      const expectedAccountMode: LinkMode = sc.existingAccount ? 'existing' : 'new';
+      const expectedContactMode: LinkMode = sc.existingContact ? 'existing' : 'new';
       testInfo.annotations.push({ type: 'scenario', description: sc.title });
 
-      let seededAccountId: string | undefined;
-      let seededContactId: string | undefined;
+      const shared = readSharedIds();
+      if ((sc.existingAccount || sc.existingContact) && !shared?.contactId) {
+        throw new Error('No shared Account / Contact recorded. They are created by the seed-shared project, which the chromium project depends on.');
+      }
 
-      await test.step('arrange: seed the records that should already exist', async () => {
-        if (sc.seedAccount) seededAccountId = await seeder.createAccount(lead.company);
-        if (sc.seedContact) {
-          seededContactId = await seeder.createContact({
-            firstName: lead.firstName,
-            lastName: lead.lastName,
-            email: lead.email,
-            accountName: lead.company,
-          });
-        }
+      // the lead carries the name of whatever should already exist
+      const lead = buildLead({
+        ...(sc.existingAccount ? { company: SHARED.accountName } : {}),
+        ...(sc.existingContact ? SHARED.contact : {}),
+      });
+      const person = fullName(lead);
+      const seededAccountId = sc.existingAccount ? shared?.accountId : undefined;
+      const seededContactId = sc.existingContact ? shared?.contactId : undefined;
+      await testInfo.attach('lead-data.json', {
+        body: JSON.stringify({ scenario: sc.title, lead, sharedAccountId: seededAccountId, sharedContactId: seededContactId }, null, 2),
+        contentType: 'application/json',
       });
 
       await test.step('go to the Sales app and create a qualified lead', async () => {
@@ -63,12 +73,22 @@ test.describe('Part B - lead to opportunity conversion', () => {
         await convert.waitUntilOpen();
       });
 
+      const branches: { account?: LinkMode; contact?: LinkMode } = {};
       await test.step('check for an existing account / contact before creating new ones', async () => {
-        expect(await convert.linkAccount(lead.company), 'account branch').toBe(expectedAccountMode);
-        expect(await convert.linkContact(person), 'contact branch').toBe(expectedContactMode);
+        // short grace period normally; on the first run the shared records are new and the search
+        // index may still be catching up, so be patient only where the scenario says they exist
+        const patience = searchPatienceMs();
+        branches.account = await convert.linkAccount(lead.company, { patienceMs: sc.existingAccount ? patience : 0 });
+        expect(branches.account, 'account branch').toBe(expectedAccountMode);
+        branches.contact = await convert.linkContact(person, { patienceMs: sc.existingContact ? patience : 0 });
+        expect(branches.contact, 'contact branch').toBe(expectedContactMode);
       });
 
       const { result, call } = await test.step('convert', async () => convert.submit());
+      await testInfo.attach('converted-ids.json', {
+        body: JSON.stringify({ ...result, branches }, null, 2),
+        contentType: 'application/json',
+      });
 
       await test.step('backend response agrees with what the ui shows (API / response validation)', async () => {
         await testInfo.attach('convert-response.json', { body: JSON.stringify(call.json, null, 2), contentType: 'application/json' });

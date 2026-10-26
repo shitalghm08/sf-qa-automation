@@ -6,7 +6,7 @@ const isCI = !!process.env.CI;
 const baseURL = (process.env.SF_LIGHTNING_URL ?? 'https://set-SF_LIGHTNING_URL-in-env.invalid').replace(/\/+$/, '');
 
 // tests that should never run as part of the normal authenticated projects
-const specialSpecs = [/auth\.setup\.ts/, /fresh-login\.spec\.ts/, /signup\.spec\.ts/, /unit[\\/]/];
+const specialSpecs = [/auth\.setup\.ts/, /shared-data\.setup\.ts/, /fresh-login\.spec\.ts/, /signup\.spec\.ts/, /unit[\\/]/];
 
 // lightning collapses buttons into overflow menus on narrow screens, so keep a desktop viewport
 const desktop = { viewport: { width: 1440, height: 900 } };
@@ -63,10 +63,18 @@ export default defineConfig({
       use: { ...devices['Desktop Safari'], ...desktop },
     },
 
+    // the Account / Contact that the "already exists" conversion scenarios link to, created once and kept
+    {
+      name: 'seed-shared',
+      dependencies: ['setup-chromium'],
+      testMatch: /shared-data\.setup\.ts/,
+      use: { ...devices['Desktop Chrome'], ...desktop, storageState: storageStatePath('chromium') },
+    },
+
     // --- the real suite ---
     {
       name: 'chromium',
-      dependencies: ['setup-chromium'],
+      dependencies: ['setup-chromium', 'seed-shared'],
       testIgnore: specialSpecs,
       use: { ...devices['Desktop Chrome'], ...desktop, storageState: storageStatePath('chromium') },
     },
