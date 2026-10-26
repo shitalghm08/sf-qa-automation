@@ -15,14 +15,18 @@ export interface CapturedCall {
 /**
  * Salesforce Lightning mostly talks to the server through the Aura endpoint
  * (POST /aura?...) which multiplexes many actions into one request, so the url alone
- * says nothing. What identifies the convert call is its payload mentioning "convert".
+ * says nothing. What identifies the convert call is the descriptor of one of its actions
+ * (...LeadConvertDesktopController/ACTION$convertLeadServer). Matching the word "convert"
+ * anywhere in the body is too loose: the telemetry beacon that Lightning sends when the
+ * Convert button is clicked mentions it as well.
  */
+const CONVERT_ACTION = /"descriptor"\s*:\s*"[^"]*convertLead[^"]*"/i;
+
 function looksLikeConvert(url: string, method: string, body: string): boolean {
   if (method !== 'POST') return false;
-  const isAura = url.includes('/aura');
-  const isRest = url.includes('/services/data/');
-  if (!isAura && !isRest) return false;
-  return /convert/i.test(body) || /convert/i.test(url);
+  if (url.includes('/aura')) return CONVERT_ACTION.test(body);
+  if (url.includes('/services/data/')) return /convert/i.test(url);
+  return false;
 }
 
 function safeDecode(raw: string): string {

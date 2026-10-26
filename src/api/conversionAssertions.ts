@@ -48,6 +48,12 @@ export function assertConversionResponse(call: CapturedCall, expected: Expected)
   expect(conHits.map((h) => h.value), 'contact id in response vs contact the ui linked').toContain(expected.contactId);
   found.contactId = conHits.find((h) => h.value === expected.contactId)!.path;
 
+  // 3b. the paths seen in real runs (NOTES.md, "What I observed"). The action index is left open
+  // because Lightning can batch other actions into the same call.
+  for (const key of ['opportunityId', 'accountId', 'contactId'] as const) {
+    expect(found[key], `where the ${key} sits in the response`).toMatch(new RegExp(`^\\$\\.actions\\[\\d+\\]\\.returnValue\\.${key}$`));
+  }
+
   // 4. if the payload exposes a stage / status style field, record what it says (informational, org dependent)
   const stageLike = deepFind(call.json, (k, v) => /^(stagename|stage|status)$/i.test(k) && typeof v === 'string');
   if (stageLike.length) found.stageOrStatusFields = stageLike.map((h) => `${h.path}=${String(h.value)}`).join('; ');
