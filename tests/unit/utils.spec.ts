@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { deepFind, findIdsByPrefix } from '../../src/utils/deepFind';
 import { extractCode } from '../../src/utils/mail';
 import { exactLabel, looseLabel } from '../../src/pages/BasePage';
-import { plusAddress } from '../../src/utils/randomData';
+import { buildLead, nameOfLength, plusAddress } from '../../src/utils/randomData';
 
 // Pure logic only - these run without a browser or an org, so they are safe to run anywhere (npm run test:unit)
 
@@ -66,5 +66,23 @@ test.describe('locator label helpers', () => {
 test.describe('test data helpers', () => {
   test('plusAddress keeps the mailbox and tags it', () => {
     expect(plusAddress('someone@gmail.com', 'sfdev1')).toBe('someone+sfdev1@gmail.com');
+  });
+
+  test('the same seed gives the same random picks, so a run can be replayed', () => {
+    const a = buildLead({}, 42);
+    const b = buildLead({}, 42);
+    for (const key of ['firstName', 'title', 'phone', 'leadSource', 'industry', 'rating', 'employees'] as const) {
+      expect(a[key], key).toBe(b[key]);
+    }
+    // the suffix carries a time and a counter, so the unique fields never repeat
+    expect(a.lastName).not.toBe(b.lastName);
+    expect(a.email).not.toBe(b.email);
+  });
+
+  test('nameOfLength is exactly that long and still ends in the suffix', () => {
+    const name = nameOfLength('Longlastname', 'abc123', 80);
+    expect(name).toHaveLength(80);
+    expect(name.endsWith('abc123')).toBe(true);
+    expect(nameOfLength('X', '', 40)).toHaveLength(40);
   });
 });

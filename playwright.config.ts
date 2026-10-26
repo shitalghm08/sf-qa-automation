@@ -2,6 +2,11 @@ import { defineConfig, devices } from '@playwright/test';
 import './src/config/env'; // side effect: loads .env
 import { storageStatePath } from './src/config/env';
 
+// One seed for the whole run, shared with the workers through the environment, so the random test data
+// can be replayed: TEST_SEED=<number> npx playwright test ...  (see README, "Replaying a run")
+if (!process.env.TEST_SEED) process.env.TEST_SEED = String(Math.floor(Math.random() * 2 ** 31));
+if (!process.env.TEST_WORKER_INDEX) console.log(`TEST_SEED=${process.env.TEST_SEED}`);
+
 const isCI = !!process.env.CI;
 const baseURL = (process.env.SF_LIGHTNING_URL ?? 'https://set-SF_LIGHTNING_URL-in-env.invalid').replace(/\/+$/, '');
 
