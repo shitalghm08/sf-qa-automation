@@ -8,15 +8,22 @@ test.describe('Negative scenarios - leads', () => {
     await home.openApp(env.salesAppName);
   });
 
-  // last name and company are the two required fields on the standard Lead object
+  // last name and company are the two required fields on the standard Lead object.
+  // The summary popover lists the compound "Name" field, not "Last Name", hence `inSummary`.
+  const LAST_NAME = { label: 'Last Name', inSummary: 'Name' };
+  const COMPANY = { label: 'Company', inSummary: 'Company' };
   const missingCases = [
-    { title: 'nothing filled in', fill: {}, missing: ['Last Name', 'Company'] },
-    { title: 'company missing', fill: { lastName: 'OnlyLastName' }, missing: ['Company'] },
-    { title: 'last name missing', fill: { company: 'QA_AUTO Only Company' }, missing: ['Last Name'] },
+    { title: 'nothing filled in', fill: {}, missing: [LAST_NAME, COMPANY] },
+    { title: 'company missing', fill: { lastName: 'OnlyLastName' }, missing: [COMPANY] },
+    { title: 'last name missing', fill: { company: 'QA_AUTO Only Company' }, missing: [LAST_NAME] },
   ];
 
   for (const c of missingCases) {
-    test(`missing mandatory fields: ${c.title}`, async ({ leads, page }) => {
+    test(`missing mandatory fields: ${c.title}`, async ({ leads, page }, testInfo) => {
+      await testInfo.attach('lead-data.json', {
+        body: JSON.stringify({ typedIn: c.fill, expectedToBeFlagged: c.missing.map((m) => m.label) }, null, 2),
+        contentType: 'application/json',
+      });
       await leads.startNewLead();
       await leads.fillForm(c.fill);
 
@@ -29,20 +36,23 @@ test.describe('Negative scenarios - leads', () => {
 
       await test.step('every missing field is flagged, and only those', async () => {
         await expect(leads.fieldErrors).toHaveCount(c.missing.length);
-        for (const label of c.missing) {
-          await expect(leads.form.getByRole('link', { name: label }).or(leads.form.getByText(label, { exact: true })).first()).toBeVisible();
+        for (const field of c.missing) {
+          // the summary lists each failing field as a link; the plain label is always on the form, so it proves nothing
+          await expect(leads.summaryLink(field.inSummary), `${field.label} should be listed in the error summary`).toBeVisible();
         }
       });
 
       await test.step('nothing was saved, the form is still open', async () => {
-        await expect(leads.form).toBeVisible();
-        await expect(page).not.toHaveURL(/\/lightning\/r\/Lead\//);
+        // inline errors only exist while the form is open (the form itself is hidden from role queries behind the popover)
+        await expect(leads.fieldErrors.first()).toBeVisible();
+        await expect(page).not.toHaveURL(/\/lightning\/r\/(?:Lead\/)?00Q/);
       });
     });
   }
 
   test('duplicate lead (same email / name / company) raises the duplicate alert', async ({ leads }, testInfo) => {
     const original = buildLead();
+    await testInfo.attach('lead-data.json', { body: JSON.stringify({ original }, null, 2), contentType: 'application/json' });
 
     await test.step('create the first lead', async () => {
       await leads.createLead(original);
@@ -50,7 +60,14 @@ test.describe('Negative scenarios - leads', () => {
 
     await test.step('try to create a second lead with the same email, name and company', async () => {
       await leads.startNewLead();
-      await leads.fillForm({ ...original });
+      // only the fields the duplicate rule looks at: this org shows the alert as soon as they are
+      // filled in, and the popover then closes any picklist that is still being opened
+      await leads.fillForm({
+        firstName: original.firstName,
+        lastName: original.lastName,
+        company: original.company,
+        email: original.email,
+      });
     });
 
     const outcome = await leads.save();
@@ -64,15 +81,15 @@ test.describe('Negative scenarios - leads', () => {
       test.skip(true, 'duplicate detection is not active in this org');
     }
 
-    await test.step('duplicate alert is shown and points at the original lead', async () => {
+    await test.step('duplicate alert is shown and offers the existing records', async () => {
       expect(outcome).toBe('duplicate-alert');
       await expect(leads.duplicateAlert).toBeVisible();
-      await expect(leads.form.getByText(original.lastName).first()).toBeVisible();
+      await expect(leads.viewDuplicatesLink).toBeVisible();
     });
 
     await test.step('cancelling leaves just the one lead', async () => {
       await leads.cancelForm();
-      await expect(leads.form).toBeHidden();
+      await expect(leads.duplicateAlert).toBeHidden();
     });
   });
 });
