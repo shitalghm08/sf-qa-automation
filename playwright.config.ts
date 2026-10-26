@@ -96,7 +96,15 @@ export default defineConfig({
       dependencies: ['setup-webkit'],
       grep: /@smoke/,
       testIgnore: specialSpecs,
-      use: { ...devices['Desktop Safari'], ...desktop, storageState: storageStatePath('webkit') },
+      // lightning modals render noticeably slower in webkit (a click on "New" was still in progress
+      // after 15 s while the modal was opening), so give it more room than chromium
+      expect: { timeout: 30_000 },
+      use: {
+        ...devices['Desktop Safari'],
+        ...desktop,
+        storageState: storageStatePath('webkit'),
+        actionTimeout: 30_000,
+      },
     },
 
     // --- opt-in projects, not part of a plain `npx playwright test` unless asked for by name ---
