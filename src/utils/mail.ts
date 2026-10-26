@@ -17,6 +17,14 @@ const CODE_PATTERNS = [
   /\b(\d{6})\b/, // last resort, only used on mails that already passed the sender/subject filter
 ];
 
+/** html-only mails: drop style/script/tags so colour codes and pixel values can't look like a code */
+function htmlToText(html: string): string {
+  return html
+    .replace(/<(style|script)[\s\S]*?<\/\1>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ');
+}
+
 export function extractCode(text: string): string | null {
   for (const re of CODE_PATTERNS) {
     const m = text.match(re);
@@ -41,6 +49,8 @@ async function scanOnce(since: Date): Promise<string | null> {
     auth: { user, pass: appPassword },
     logger: false,
   });
+  // without a listener an 'error' event (socket reset, timeout) is an uncaught exception
+  client.on('error', (err: Error) => log.warn(`imap connection error: ${err.message}`));
 
   await client.connect();
   try {
@@ -64,13 +74,20 @@ async function scanOnce(since: Date): Promise<string | null> {
           if (!msg || !msg.source) continue;
 
           const arrived = new Date(msg.internalDate as Date | string);
-          if (arrived.getTime() < since.getTime()) continue;
+          if (arrived.getTime() < since.getTime()) {
+            log.debug(`skip uid ${uid} in ${folder}: older than the login click`, { arrived: arrived.toISOString() });
+            continue;
+          }
 
           const parsed = await simpleParser(msg.source);
           const subject = parsed.subject ?? '';
-          if (!/verif|identity|code/i.test(subject)) continue;
+          if (!/verif|identity|code/i.test(subject)) {
+            log.debug(`skip uid ${uid} in ${folder}: subject "${subject}" doesn't look like a verification mail`);
+            continue;
+          }
 
-          const code = extractCode(`${parsed.text ?? ''}\n${parsed.html || ''}`);
+          const body = parsed.text?.trim() || htmlToText(parsed.html || '');
+          const code = extractCode(body);
           if (code && !usedCodes.has(code)) {
             log.info(`found verification mail "${subject}" in ${folder}`, { code: mask(code, 1) });
             return code;
@@ -92,7 +109,7 @@ async function scanOnce(since: Date): Promise<string | null> {
  */
 export async function waitForVerificationCode(opts: OtpOptions): Promise<string> {
   const timeoutMs = opts.timeoutMs ?? env.mail.otpTimeoutMs;
-  const pollEveryMs = opts.pollEveryMs ?? 4_000;
+  const pollEveryMs = opts.pollEveryMs ?? 5_000;
   // allow a little skew between this machine and the mail server clock
   const since = new Date(opts.since.getTime() - 15_000);
   const deadline = Date.now() + timeoutMs;
@@ -112,6 +129,13 @@ export async function waitForVerificationCode(opts: OtpOptions): Promise<string>
       log.debug(`poll #${attempt}: nothing yet`);
     } catch (err) {
       // transient imap hiccups shouldn't kill the run, auth errors will keep repeating and end up in the timeout message
+      if ((err as { authenticationFailed?: boolean }).authenticationFailed) {
+        // the same credentials will fail on every poll, so don't wait out the timeout
+        throw new Error(
+          `Gmail rejected MAIL_USER / MAIL_APP_PASSWORD for ${env.mail.user}. ` +
+            'Check that IMAP is enabled and the app password is correct (16 chars, no spaces).',
+        );
+      }
       lastError = err;
       log.warn(`poll #${attempt} failed: ${(err as Error).message}`);
     }
