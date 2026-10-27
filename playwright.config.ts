@@ -5,6 +5,8 @@ import { storageStatePath } from './src/config/env';
 // One seed for the whole run, shared with the workers through the environment, so the random test data
 // can be replayed: TEST_SEED=<number> npx playwright test ...  (see README, "Replaying a run")
 if (!process.env.TEST_SEED) process.env.TEST_SEED = String(Math.floor(Math.random() * 2 ** 31));
+// Likewise one start time, which names this run's log file and its folder in runs/ (src/utils/runInfo.ts)
+if (!process.env.RUN_STARTED) process.env.RUN_STARTED = new Date().toISOString();
 if (!process.env.TEST_WORKER_INDEX) console.log(`TEST_SEED=${process.env.TEST_SEED}`);
 
 const isCI = !!process.env.CI;
@@ -38,7 +40,7 @@ export default defineConfig({
     ['html', { outputFolder: 'playwright-report', open: 'never' }],
     ['json', { outputFile: 'test-results/report.json' }],
     ['junit', { outputFile: 'test-results/junit.xml' }],
-    // one file per run in logs/runs/, so the data of earlier runs survives the next run
+    // archives each run in runs/<start time>_seed<seed>/, so the data of earlier runs survives the next run
     ['./src/reporters/runData.ts'],
   ],
 

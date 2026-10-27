@@ -32,7 +32,8 @@ playwright.config.ts        projects, reporters, timeouts
 src/
   config/env.ts             env loading, one place for org-specific values
   utils/
-    logger.ts               leveled logger -> console + logs/run.log
+    logger.ts               leveled logger -> console + logs/<run>.log, local-time stamps
+    runInfo.ts              the run id (start time + seed) that names the log file and the runs/ folder
     randomData.ts           unique lead data per run / worker
     sharedData.ts           the shared Account / Contact for the "already exists" scenarios
     mail.ts                 IMAP poller that reads the verification code
@@ -128,6 +129,8 @@ OPP_EXPECTED_STAGE=Prospecting
 
 # ---- Misc ----
 LOG_LEVEL=info
+# time zone of the log timestamps: local (this machine, the default), UTC, or e.g. Asia/Singapore
+LOG_TZ=local
 # cached session older than this is thrown away without even checking it
 SESSION_MAX_AGE_HOURS=10
 ```
@@ -175,7 +178,7 @@ TEST_SEED=1988347801 npx playwright test -g "account exists" --project=chromium 
 $env:TEST_SEED=1988347801; npx playwright test -g "account exists" --project=chromium    # PowerShell
 ```
 
-The seed is also written to `logs/run.log` (`random data seed (TEST_SEED)`) and to the run's folder in `runs/`, which is named after it. What is not replayed is the unique suffix in the names, company and email: it carries a timestamp on purpose, so a replay never collides with the records the original run left in the org.
+The seed is also written to the run's log file (`random data seed (TEST_SEED)`) and to the run's folder in `runs/`, which is named after it. What is not replayed is the unique suffix in the names, company and email: it carries a timestamp on purpose, so a replay never collides with the records the original run left in the org.
 
 Playwright projects:
 
@@ -192,7 +195,7 @@ The first run does a real login, so it takes longer (and fetches the email code)
 
 The first run also creates the shared Account / Contact (see Test data strategy). The two "already exists" conversion scenarios may then wait a few minutes for the new records to show up in Salesforce search. Later runs don't.
 
-For more detail in `logs/run.log` set `LOG_LEVEL=debug` in `.env`. It adds the field hooks Lightning rendered on each details tab and, for the login, why each mail in the mailbox was skipped.
+For more detail in the run's log file set `LOG_LEVEL=debug` in `.env`. It adds the field hooks Lightning rendered on each details tab and, for the login, why each mail in the mailbox was skipped.
 
 `npm test` reports 2 skipped tests. Those are `fresh-login` and `signup`, which are opt-in on purpose.
 
@@ -206,7 +209,7 @@ Test Run Outcome:
 
 - `playwright-report/index.html` - HTML report with steps, attachments (lead data, convert response JSON), traces on retry, screenshots + video for failures
 - `test-results/report.json` and `test-results/junit.xml` - for tooling
-- `logs/run.log` - timestamped, per-worker log lines (`[w2] INFO LoginPage: login ok`)
+- `logs/<start time>_seed<seed>.log` - one log file per run, timestamped in local time with the offset (`2026-10-27 16:42:41.642+08:00 [w2] INFO  LoginPage: login ok`). `LOG_TZ` in `.env` changes the zone (`UTC`, or an IANA name such as `Asia/Singapore`). A copy is archived as `run.log` in the run's folder under `runs/`. Folder and file names use the start time in UTC
 - `runs/` - **every run, kept.** Playwright empties `test-results/` and rewrites `playwright-report/` at the start of each run, so those two only ever show the latest one. At the end of a run a copy of both is archived into `runs/<start time>_seed<seed>/`, together with the data the tests used. `runs/index.csv` has one line per run (start, seed, status, passed / failed / skipped, folder, and a note that stays empty unless the archive is incomplete)
 
 ### Keeping earlier runs
@@ -218,6 +221,7 @@ runs/
     test-data.json                            what each test used and created
     playwright-report/                        the HTML report of that run
     test-results/                             screenshots, videos, traces, junit.xml, report.json
+    run.log                                   the log lines of that run
 ```
 
 Open an earlier report with `npx playwright show-report runs/<folder>/playwright-report`, and a trace with `npx playwright show-trace runs/<folder>/test-results/<test>/trace.zip`. The usual places keep working and keep showing the latest run: `npm run report`, `test-results/` and `--last-failed`.

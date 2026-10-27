@@ -1,0 +1,664 @@
+{
+  "run": {
+    "startedAt": "2026-10-27T09:12:39.558Z",
+    "finishedAt": "2026-10-27T09:19:57.569Z",
+    "durationMs": 438011,
+    "status": "passed",
+    "seed": "317957723",
+    "workers": 3,
+    "projects": [
+      "unit",
+      "fresh-login",
+      "signup",
+      "setup-chromium",
+      "setup-webkit",
+      "seed-shared",
+      "chromium",
+      "webkit-smoke"
+    ],
+    "arguments": "test"
+  },
+  "totals": {
+    "passed": 31,
+    "failed": 0,
+    "skipped": 2,
+    "interrupted": 0
+  },
+  "tests": [
+    {
+      "project": "unit",
+      "file": "utils.spec.ts",
+      "test": "verification code parsing > is not fooled by other numbers earlier in the mail",
+      "status": "passed",
+      "retry": 0,
+      "durationMs": 16,
+      "annotations": [],
+      "data": {}
+    },
+    {
+      "project": "unit",
+      "file": "utils.spec.ts",
+      "test": "verification code parsing > returns null when there is nothing code-like",
+      "status": "passed",
+      "retry": 0,
+      "durationMs": 17,
+      "annotations": [],
+      "data": {}
+    },
+    {
+      "project": "unit",
+      "file": "utils.spec.ts",
+      "test": "verification code parsing > reads the code from the usual wording",
+      "status": "passed",
+      "retry": 0,
+      "durationMs": 9,
+      "annotations": [],
+      "data": {}
+    },
+    {
+      "project": "unit",
+      "file": "utils.spec.ts",
+      "test": "deep json helpers > finds ids by key prefix and reports the path",
+      "status": "passed",
+      "retry": 0,
+      "durationMs": 6,
+      "annotations": [],
+      "data": {}
+    },
+    {
+      "project": "unit",
+      "file": "utils.spec.ts",
+      "test": "deep json helpers > ignores strings that only look similar",
+      "status": "passed",
+      "retry": 0,
+      "durationMs": 5,
+      "annotations": [],
+      "data": {}
+    },
+    {
+      "project": "unit",
+      "file": "utils.spec.ts",
+      "test": "deep json helpers > generic matcher works on keys",
+      "status": "passed",
+      "retry": 0,
+      "durationMs": 5,
+      "annotations": [],
+      "data": {}
+    },
+    {
+      "project": "unit",
+      "file": "utils.spec.ts",
+      "test": "locator label helpers > exactLabel tolerates the required-field asterisk but nothing else",
+      "status": "passed",
+      "retry": 0,
+      "durationMs": 9,
+      "annotations": [],
+      "data": {}
+    },
+    {
+      "project": "unit",
+      "file": "utils.spec.ts",
+      "test": "locator label helpers > looseLabel matches picklist buttons that include the current value",
+      "status": "passed",
+      "retry": 0,
+      "durationMs": 4,
+      "annotations": [],
+      "data": {}
+    },
+    {
+      "project": "unit",
+      "file": "utils.spec.ts",
+      "test": "locator label helpers > labels with regex characters are escaped",
+      "status": "passed",
+      "retry": 0,
+      "durationMs": 5,
+      "annotations": [],
+      "data": {}
+    },
+    {
+      "project": "unit",
+      "file": "utils.spec.ts",
+      "test": "test data helpers > plusAddress keeps the mailbox and tags it",
+      "status": "passed",
+      "retry": 0,
+      "durationMs": 5,
+      "annotations": [],
+      "data": {}
+    },
+    {
+      "project": "unit",
+      "file": "utils.spec.ts",
+      "test": "test data helpers > nameOfLength is exactly that long and still ends in the suffix",
+      "status": "passed",
+      "retry": 0,
+      "durationMs": 7,
+      "annotations": [],
+      "data": {}
+    },
+    {
+      "project": "fresh-login",
+      "file": "fresh-login.spec.ts",
+      "test": "fresh browser login (with email verification when asked) and session reuse",
+      "status": "skipped",
+      "retry": 0,
+      "durationMs": 0,
+      "annotations": [
+        {
+          "type": "skip",
+          "description": "opt-in: use `npm run test:fresh-login`"
+        }
+      ],
+      "data": {}
+    },
+    {
+      "project": "signup",
+      "file": "signup.spec.ts",
+      "test": "register a new developer org (form fill, submit is opt-in)",
+      "status": "skipped",
+      "retry": 0,
+      "durationMs": 0,
+      "annotations": [
+        {
+          "type": "skip",
+          "description": "opt-in: use `npm run signup:fill`"
+        }
+      ],
+      "data": {}
+    },
+    {
+      "project": "unit",
+      "file": "utils.spec.ts",
+      "test": "test data helpers > the same seed gives the same random picks, so a run can be replayed",
+      "status": "passed",
+      "retry": 0,
+      "durationMs": 14,
+      "annotations": [],
+      "data": {}
+    },
+    {
+      "project": "setup-chromium",
+      "file": "auth.setup.ts",
+      "test": "authenticate and cache session",
+      "status": "passed",
+      "retry": 0,
+      "durationMs": 2788,
+      "annotations": [],
+      "data": {}
+    },
+    {
+      "project": "setup-webkit",
+      "file": "auth.setup.ts",
+      "test": "authenticate and cache session",
+      "status": "passed",
+      "retry": 0,
+      "durationMs": 13171,
+      "annotations": [],
+      "data": {}
+    },
+    {
+      "project": "seed-shared",
+      "file": "shared-data.setup.ts",
+      "test": "seed the shared Account and Contact for the conversion scenarios",
+      "status": "passed",
+      "retry": 0,
+      "durationMs": 13356,
+      "annotations": [],
+      "data": {
+        "shared-ids": {
+          "accountId": "001g8000016MMkNAAW",
+          "contactId": "003g800000trzk9AAA",
+          "reused": true
+        }
+      }
+    },
+    {
+      "project": "chromium",
+      "file": "login.spec.ts",
+      "test": "PartA-login with cached session > lands on lightning home with app launcher and global search",
+      "status": "passed",
+      "retry": 0,
+      "durationMs": 14286,
+      "annotations": [],
+      "data": {}
+    },
+    {
+      "project": "chromium",
+      "file": "leadConversion.spec.ts",
+      "test": "PartB-lead to opportunity conversion > convert lead: account exists, linked; contact gets created",
+      "status": "passed",
+      "retry": 0,
+      "durationMs": 135427,
+      "annotations": [
+        {
+          "type": "scenario",
+          "description": "account exists, linked; contact gets created"
+        }
+      ],
+      "data": {
+        "lead-data": {
+          "scenario": "account exists, linked; contact gets created",
+          "lead": {
+            "firstName": "Laurence",
+            "lastName": "Automvqgwqpk81fu4",
+            "company": "QA_AUTO Shared Existing Account",
+            "title": "Dynamic Brand Orchestrator",
+            "email": "qa.mvqgwqpk81fu4@example.com",
+            "phone": "+65 77594632",
+            "website": "https://www.mvqgwqpk81fu4.example.com",
+            "leadSource": "Phone Inquiry",
+            "industry": "Retail",
+            "rating": "Warm",
+            "employees": "565"
+          },
+          "sharedAccountId": "001g8000016MMkNAAW"
+        },
+        "converted-ids": {
+          "accountId": "001g8000016MMkNAAW",
+          "contactId": "003g800000uF8OfAAK",
+          "opportunityId": "006g800000AIpIWAA1",
+          "branches": {
+            "account": "existing",
+            "contact": "new"
+          }
+        },
+        "convert-json-paths": {
+          "opportunityId": "$.actions[0].returnValue.opportunityId",
+          "accountId": "$.actions[0].returnValue.accountId",
+          "contactId": "$.actions[0].returnValue.contactId"
+        }
+      }
+    },
+    {
+      "project": "chromium",
+      "file": "leadConversion.spec.ts",
+      "test": "PartB-lead to opportunity conversion > convert lead: neither account nor contact exists, both get created",
+      "status": "passed",
+      "retry": 0,
+      "durationMs": 142870,
+      "annotations": [
+        {
+          "type": "scenario",
+          "description": "neither account nor contact exists, both get created"
+        }
+      ],
+      "data": {
+        "lead-data": {
+          "scenario": "neither account nor contact exists, both get created",
+          "lead": {
+            "firstName": "Brittany",
+            "lastName": "Automvqgwqpo71o08",
+            "company": "QA_AUTO Cummerata LLC mvqgwqpo71o08",
+            "title": "Lead Directives Producer",
+            "email": "qa.mvqgwqpo71o08@example.com",
+            "phone": "+65 85171810",
+            "website": "https://www.mvqgwqpo71o08.example.com",
+            "leadSource": "Partner Referral",
+            "industry": "Technology",
+            "rating": "Cold",
+            "employees": "695"
+          }
+        },
+        "converted-ids": {
+          "accountId": "001g80000179bn0AAA",
+          "contactId": "003g800000uFDBBAA4",
+          "opportunityId": "006g800000AIrjFAAT",
+          "branches": {
+            "account": "new",
+            "contact": "new"
+          }
+        },
+        "convert-json-paths": {
+          "opportunityId": "$.actions[0].returnValue.opportunityId",
+          "accountId": "$.actions[0].returnValue.accountId",
+          "contactId": "$.actions[0].returnValue.contactId"
+        }
+      }
+    },
+    {
+      "project": "chromium",
+      "file": "leadConversion.spec.ts",
+      "test": "PartB-lead to opportunity conversion > convert lead: account and contact exist, both linked",
+      "status": "passed",
+      "retry": 0,
+      "durationMs": 126729,
+      "annotations": [
+        {
+          "type": "scenario",
+          "description": "account and contact exist, both linked"
+        }
+      ],
+      "data": {
+        "lead-data": {
+          "scenario": "account and contact exist, both linked",
+          "lead": {
+            "firstName": "Sharon",
+            "lastName": "AutoSharedContact",
+            "company": "QA_AUTO Shared Existing Account",
+            "title": "Direct Optimization Administrator",
+            "email": "qa.shared.contact@example.com",
+            "phone": "+65 68956614",
+            "website": "https://www.mvqgx4vt618a1.example.com",
+            "leadSource": "Phone Inquiry",
+            "industry": "Technology",
+            "rating": "Hot",
+            "employees": "376"
+          },
+          "sharedAccountId": "001g8000016MMkNAAW",
+          "sharedContactId": "003g800000trzk9AAA"
+        },
+        "converted-ids": {
+          "accountId": "001g8000016MMkNAAW",
+          "contactId": "003g800000trzk9AAA",
+          "opportunityId": "006g800000AIrePAAT",
+          "branches": {
+            "account": "existing",
+            "contact": "existing"
+          }
+        },
+        "convert-json-paths": {
+          "opportunityId": "$.actions[0].returnValue.opportunityId",
+          "accountId": "$.actions[0].returnValue.accountId",
+          "contactId": "$.actions[0].returnValue.contactId"
+        }
+      }
+    },
+    {
+      "project": "chromium",
+      "file": "leadData.spec.ts",
+      "test": "PartB-lead data variations > create a lead with apostrophes in the names",
+      "status": "passed",
+      "retry": 0,
+      "durationMs": 55439,
+      "annotations": [
+        {
+          "type": "variation",
+          "description": "apostrophes in the names"
+        }
+      ],
+      "data": {
+        "lead-data": {
+          "firstName": "D'Arcy",
+          "lastName": "O'Neilmvqgzym572axc",
+          "company": "QA_AUTO Deckow Funk and Crist mvqgzym673twv",
+          "title": "Forward Web Specialist",
+          "email": "qa.mvqgzym673twv@example.com",
+          "phone": "+65 43242985",
+          "website": "https://www.mvqgzym673twv.example.com",
+          "leadSource": "Phone Inquiry",
+          "industry": "Technology",
+          "rating": "Warm",
+          "employees": "385"
+        }
+      }
+    },
+    {
+      "project": "chromium",
+      "file": "lead.spec.ts",
+      "test": "PartB-lead creation and management > create a lead, verify the details view, then qualify it",
+      "status": "passed",
+      "retry": 0,
+      "durationMs": 64161,
+      "annotations": [
+        {
+          "type": "lead",
+          "description": "Lexi Automvqgzs7l82feh / QA_AUTO Olson and Sons mvqgzs7l82feh"
+        },
+        {
+          "type": "lead-id",
+          "description": "00Qg800000IlQ6LEAV"
+        }
+      ],
+      "data": {
+        "lead-data": {
+          "firstName": "Lexi",
+          "lastName": "Automvqgzs7l82feh",
+          "company": "QA_AUTO Olson and Sons mvqgzs7l82feh",
+          "title": "Direct Communications Strategist",
+          "email": "qa.mvqgzs7l82feh@example.com",
+          "phone": "+65 62881155",
+          "website": "https://www.mvqgzs7l82feh.example.com",
+          "leadSource": "Web",
+          "industry": "Healthcare",
+          "rating": "Warm",
+          "employees": "34"
+        }
+      }
+    },
+    {
+      "project": "chromium",
+      "file": "leadData.spec.ts",
+      "test": "PartB-lead data variations > create a lead with accented and hyphenated names",
+      "status": "passed",
+      "retry": 0,
+      "durationMs": 54816,
+      "annotations": [
+        {
+          "type": "variation",
+          "description": "accented and hyphenated names"
+        }
+      ],
+      "data": {
+        "lead-data": {
+          "firstName": "Zoë",
+          "lastName": "Müller-Ñandúmvqh00l162hot",
+          "company": "QA_AUTO Swaniawski Brakus and Hessel mvqh00l263alt",
+          "title": "Internal Research Associate",
+          "email": "qa.mvqh00l263alt@example.com",
+          "phone": "+65 24184661",
+          "website": "https://www.mvqh00l263alt.example.com",
+          "leadSource": "Purchased List",
+          "industry": "Technology",
+          "rating": "Cold",
+          "employees": "622"
+        }
+      }
+    },
+    {
+      "project": "chromium",
+      "file": "leadData.spec.ts",
+      "test": "PartB-lead data variations > create a lead with first, last name and company at their maximum length",
+      "status": "passed",
+      "retry": 0,
+      "durationMs": 54855,
+      "annotations": [
+        {
+          "type": "variation",
+          "description": "first, last name and company at their maximum length"
+        }
+      ],
+      "data": {
+        "lead-data": {
+          "firstName": "LongfirstnameLongfirstnameLongfirstnameL",
+          "lastName": "LonglastnameLonglastnameLonglastnameLonglastnameLonglastnameLonglasmvqh17ul83s3g",
+          "company": "QA_AUTO Long Company QA_AUTO Long Company QA_AUTO Long Company QA_AUTO Long Company QA_AUTO Long Company QA_AUTO Long Company QA_AUTO Long Company QA_AUTO Long Company QA_AUTO Long Company QA_AUTO Long Company QA_AUTO Long Company QA_AUTO Lonmvqh17ul83s3g",
+          "title": "Principal Assurance Assistant",
+          "email": "qa.mvqh17un84efh@example.com",
+          "phone": "+65 62935645",
+          "website": "https://www.mvqh17un84efh.example.com",
+          "leadSource": "Purchased List",
+          "industry": "Retail",
+          "rating": "Warm",
+          "employees": "874"
+        }
+      }
+    },
+    {
+      "project": "chromium",
+      "file": "leadData.spec.ts",
+      "test": "PartB-lead data variations > create a lead with company with an ampersand and a hyphen",
+      "status": "passed",
+      "retry": 0,
+      "durationMs": 55684,
+      "annotations": [
+        {
+          "type": "variation",
+          "description": "company with an ampersand and a hyphen"
+        }
+      ],
+      "data": {
+        "lead-data": {
+          "firstName": "Alessandro",
+          "lastName": "Automvqh1755750ze",
+          "company": "QA_AUTO Smith & Sons - Östlund mvqh175474mhq",
+          "title": "District Markets Facilitator",
+          "email": "qa.mvqh1755750ze@example.com",
+          "phone": "+65 31902885",
+          "website": "https://www.mvqh1755750ze.example.com",
+          "leadSource": "Partner Referral",
+          "industry": "Retail",
+          "rating": "Cold",
+          "employees": "718"
+        }
+      }
+    },
+    {
+      "project": "chromium",
+      "file": "negative.spec.ts",
+      "test": "Negative scenarios - leads > missing mandatory fields: nothing filled in",
+      "status": "passed",
+      "retry": 0,
+      "durationMs": 34739,
+      "annotations": [],
+      "data": {
+        "lead-data": {
+          "typedIn": {},
+          "expectedToBeFlagged": [
+            "Last Name",
+            "Company"
+          ]
+        }
+      }
+    },
+    {
+      "project": "chromium",
+      "file": "leadData.spec.ts",
+      "test": "PartB-lead data variations > every Lead Source value can be saved and read back",
+      "status": "passed",
+      "retry": 0,
+      "durationMs": 88000,
+      "annotations": [],
+      "data": {
+        "lead-data": {
+          "firstName": "Braulio",
+          "lastName": "Automvqh18zu64awh",
+          "company": "QA_AUTO Grady Lynch and Koch mvqh18zu64awh",
+          "title": "Lead Applications Designer",
+          "email": "qa.mvqh18zu64awh@example.com",
+          "phone": "+65 06157781",
+          "website": "https://www.mvqh18zu64awh.example.com",
+          "leadSource": "Web",
+          "industry": "Healthcare",
+          "rating": "Cold",
+          "employees": "126"
+        }
+      }
+    },
+    {
+      "project": "chromium",
+      "file": "negative.spec.ts",
+      "test": "Negative scenarios - leads > missing mandatory fields: company missing",
+      "status": "passed",
+      "retry": 0,
+      "durationMs": 36690,
+      "annotations": [],
+      "data": {
+        "lead-data": {
+          "typedIn": {
+            "lastName": "OnlyLastName"
+          },
+          "expectedToBeFlagged": [
+            "Company"
+          ]
+        }
+      }
+    },
+    {
+      "project": "chromium",
+      "file": "negative.spec.ts",
+      "test": "Negative scenarios - leads > missing mandatory fields: last name missing",
+      "status": "passed",
+      "retry": 0,
+      "durationMs": 35445,
+      "annotations": [],
+      "data": {
+        "lead-data": {
+          "typedIn": {
+            "company": "QA_AUTO Only Company"
+          },
+          "expectedToBeFlagged": [
+            "Last Name"
+          ]
+        }
+      }
+    },
+    {
+      "project": "webkit-smoke",
+      "file": "login.spec.ts",
+      "test": "PartA-login with cached session > lands on lightning home with app launcher and global search",
+      "status": "passed",
+      "retry": 0,
+      "durationMs": 35067,
+      "annotations": [],
+      "data": {}
+    },
+    {
+      "project": "chromium",
+      "file": "negative.spec.ts",
+      "test": "Negative scenarios - leads > duplicate lead (same email / name / company) raises the duplicate alert",
+      "status": "passed",
+      "retry": 0,
+      "durationMs": 71373,
+      "annotations": [],
+      "data": {
+        "lead-data": {
+          "original": {
+            "firstName": "Rylan",
+            "lastName": "Automvqh3e0y65kl7",
+            "company": "QA_AUTO Lesch Von and Klocko mvqh3e0y65kl7",
+            "title": "Dynamic Infrastructure Assistant",
+            "email": "qa.mvqh3e0y65kl7@example.com",
+            "phone": "+65 46108886",
+            "website": "https://www.mvqh3e0y65kl7.example.com",
+            "leadSource": "Purchased List",
+            "industry": "Healthcare",
+            "rating": "Warm",
+            "employees": "44"
+          }
+        }
+      }
+    },
+    {
+      "project": "webkit-smoke",
+      "file": "lead.spec.ts",
+      "test": "PartB-lead creation and management > create a lead, verify the details view, then qualify it",
+      "status": "passed",
+      "retry": 0,
+      "durationMs": 64485,
+      "annotations": [
+        {
+          "type": "lead",
+          "description": "Archibald Automvqh46rx101vom / QA_AUTO Heathcote Donnelly and Jacobs mvqh46rx101vom"
+        },
+        {
+          "type": "lead-id",
+          "description": "00Qg800000IlKGiEAN"
+        }
+      ],
+      "data": {
+        "lead-data": {
+          "firstName": "Archibald",
+          "lastName": "Automvqh46rx101vom",
+          "company": "QA_AUTO Heathcote Donnelly and Jacobs mvqh46rx101vom",
+          "title": "Human Marketing Planner",
+          "email": "qa.mvqh46rx101vom@example.com",
+          "phone": "+65 64660401",
+          "website": "https://www.mvqh46rx101vom.example.com",
+          "leadSource": "Phone Inquiry",
+          "industry": "Finance",
+          "rating": "Cold",
+          "employees": "463"
+        }
+      }
+    }
+  ]
+}

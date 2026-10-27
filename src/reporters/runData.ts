@@ -1,6 +1,8 @@
 import type { FullConfig, FullResult, Reporter, TestCase, TestResult } from '@playwright/test/reporter';
 import * as fs from 'fs';
 import * as path from 'path';
+import { logFile } from '../utils/logger';
+import { runName, runStartedAt } from '../utils/runInfo';
 
 /**
  * Keeps every run. Playwright empties test-results/ and rewrites playwright-report/ at the start of
@@ -11,6 +13,7 @@ import * as path from 'path';
  *     test-data.json       what each test used and created (the ids, the lead data)
  *     playwright-report/   the HTML report of that run    open: npx playwright show-report runs/<run>/playwright-report
  *     test-results/        screenshots, videos, traces, junit.xml, report.json of that run
+ *     run.log              the timestamped log lines of that run (a copy of logs/<run>.log)
  *   runs/index.csv         one line per run, to find the one you want
  *
  * The usual locations (test-results/, playwright-report/, --last-failed, npm run report) are untouched
@@ -36,7 +39,7 @@ interface Entry {
 
 export default class RunDataReporter implements Reporter {
   private config!: FullConfig;
-  private readonly startedAt = new Date();
+  private readonly startedAt = runStartedAt();
   private readonly entries: Entry[] = [];
   private runDir?: string;
 
@@ -86,9 +89,8 @@ export default class RunDataReporter implements Reporter {
     // config.rootDir is the tests folder, the runs live next to the config file
     const projectDir = this.config.configFile ? path.dirname(this.config.configFile) : process.cwd();
     const runsDir = path.join(projectDir, 'runs');
-    const stamp = this.startedAt.toISOString().replace(/[:.]/g, '-');
-    const runName = `${stamp}_seed${seed}`;
-    this.runDir = path.join(runsDir, runName);
+    const name = runName();
+    this.runDir = path.join(runsDir, name);
     fs.mkdirSync(this.runDir, { recursive: true });
 
     fs.writeFileSync(
@@ -118,7 +120,7 @@ export default class RunDataReporter implements Reporter {
     if (!fs.existsSync(index)) fs.writeFileSync(index, 'started,seed,status,passed,failed,skipped,folder,note\n');
     fs.appendFileSync(
       index,
-      `${this.startedAt.toISOString()},${seed},${result.status},${totals.passed},${totals.failed},${totals.skipped},${runName},\n`,
+      `${this.startedAt.toISOString()},${seed},${result.status},${totals.passed},${totals.failed},${totals.skipped},${name},\n`,
     );
   }
 
@@ -140,6 +142,11 @@ export default class RunDataReporter implements Reporter {
       } catch (err) {
         console.warn(`Run archive: could not copy ${name}: ${(err as Error).message}`);
       }
+    }
+    try {
+      if (fs.existsSync(logFile)) fs.copyFileSync(logFile, path.join(this.runDir, 'run.log'));
+    } catch (err) {
+      console.warn(`Run archive: could not copy the log: ${(err as Error).message}`);
     }
     console.log(`Run archived: runs/${path.basename(this.runDir)}`);
   }

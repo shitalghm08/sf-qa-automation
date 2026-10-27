@@ -141,7 +141,7 @@ The five-minute search-index allowance in `src/utils/sharedData.ts` rests on onl
 
 ## Debugging log
 
-What actually broke while getting this to run against a real org, in the order it happened. Each row was found from the failure artefacts (screenshot, `error-context.md` page snapshot, call log, `logs/run.log`). The change history is in the git log.
+What actually broke while getting this to run against a real org, in the order it happened. Each row was found from the failure artefacts (screenshot, `error-context.md` page snapshot, call log, the run's log file in `logs/`). The change history is in the git log.
 
 | what broke | how I found out | fix | where |
 |---|---|---|---|

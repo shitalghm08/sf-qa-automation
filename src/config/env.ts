@@ -77,6 +77,10 @@ export const env = {
   get logLevel() {
     return optional('LOG_LEVEL', 'info');
   },
+  get logTimeZone() {
+    // 'local' (this machine), 'UTC', or an IANA zone such as Asia/Singapore
+    return optional('LOG_TZ', 'local');
+  },
   get sessionMaxAgeHours() {
     return Number(optional('SESSION_MAX_AGE_HOURS', '10'));
   },

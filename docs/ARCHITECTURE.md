@@ -97,7 +97,7 @@ flowchart TB
   end
   subgraph SUP["Support: src/utils and src/config"]
     ENV["env: the only reader of .env"]
-    LOG["logger: console and logs/run.log"]
+    LOG["logger: console and logs/&lt;run&gt;.log"]
     DATA["randomData: seeded lead data"]
     SHARED["sharedData: shared Account and Contact ids"]
     MAIL["mail: IMAP reader for the login code"]
@@ -199,7 +199,7 @@ The code can only be read when it is sent by email. A user with a verified mobil
 | Latest HTML report | `playwright-report/` | yes |
 | Latest screenshots, videos, traces, JUnit and JSON | `test-results/` | yes |
 | Every run, with the data each test used | `runs/<start time>_seed<seed>/`, indexed in `runs/index.csv` | no |
-| Timestamped worker log | `logs/run.log` | no, appended |
+| Timestamped worker log, one file per run (copied into the run folder as `run.log`) | `logs/<start time>_seed<seed>.log` | no |
 | Cached sessions and the shared record ids | `auth/` | when the login is redone |
 
 By default every test keeps a screenshot, a video and a trace; `ARTIFACTS=failures` keeps them only for failures. The two login tests never record a trace, because a trace stores typed values and request bodies.
