@@ -1,9 +1,9 @@
 import { Browser, expect, test as setup, TestInfo } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
-import { env, storageStatePath } from '../src/config/env';
-import { LoginPage } from '../src/pages/LoginPage';
-import { getLogger } from '../src/utils/logger';
+import { env, storageStatePath } from '../../src/config/env';
+import { LoginPage } from '../../src/pages/LoginPage';
+import { getLogger } from '../../src/utils/logger';
 
 const log = getLogger('auth.setup');
 

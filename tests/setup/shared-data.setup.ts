@@ -1,6 +1,6 @@
-import { test as setup } from '../src/fixtures';
-import { getLogger } from '../src/utils/logger';
-import { readSharedIds, SHARED, writeSharedIds } from '../src/utils/sharedData';
+import { test as setup } from '../../src/fixtures';
+import { getLogger } from '../../src/utils/logger';
+import { readSharedIds, SHARED, writeSharedIds } from '../../src/utils/sharedData';
 
 const log = getLogger('shared-data.setup');
 

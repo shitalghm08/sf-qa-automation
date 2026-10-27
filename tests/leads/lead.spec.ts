@@ -1,9 +1,9 @@
-import { env } from '../src/config/env';
-import { expect, test } from '../src/fixtures';
-import { buildLead, fullName } from '../src/utils/randomData';
+import { env } from '../../src/config/env';
+import { expect, test } from '../../src/fixtures';
+import { buildLead, fullName } from '../../src/utils/randomData';
 
-test.describe('Part B - lead creation and management', () => {
-  test('create a lead, verify the details view, then qualify it @smoke', async ({ home, leads }, testInfo) => {
+test.describe('PartB-lead creation and management', { tag: ['@smoke', '@regression'] }, () => {
+  test('create a lead, verify the details view, then qualify it', async ({ home, leads }, testInfo) => {
     // every run (and every parallel worker) gets its own lead
     const lead = buildLead();
     testInfo.annotations.push({ type: 'lead', description: `${fullName(lead)} / ${lead.company}` });

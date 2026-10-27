@@ -1,9 +1,9 @@
 import { test } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
-import { env } from '../src/config/env';
-import { SignupPage } from '../src/pages/SignupPage';
-import { buildLead, plusAddress, uniqueSuffix } from '../src/utils/randomData';
+import { env } from '../../src/config/env';
+import { SignupPage } from '../../src/pages/SignupPage';
+import { buildLead, plusAddress, uniqueSuffix } from '../../src/utils/randomData';
 
 /**
  * Part A (steps 1-2). Opt-in, not a regression test: you only need a developer org once.
@@ -46,7 +46,7 @@ test('register a new developer org (form fill, submit is opt-in)', async ({ page
   });
 
   // write the username down, it is needed for .env afterwards
-  const note = path.resolve(__dirname, '../logs/signup-username.txt');
+  const note = path.resolve(__dirname, '../../logs/signup-username.txt');
   fs.mkdirSync(path.dirname(note), { recursive: true });
   fs.writeFileSync(note, `${data.username}\n`);
 

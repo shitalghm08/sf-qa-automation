@@ -4,7 +4,7 @@ UI automation for the Salesforce Sales app (Lead creation, edit, conversion into
 
 The important thing considered while building it: no `sleep()`s, locators that don't depend on generated ids, a page-object layer that specs can read like a story, and a login that copes with Salesforce's email verification instead of pretending it doesn't exist.
 
-Extra notes (shadow DOM evidence, API discovery, debugging log) live in [NOTES.md](./NOTES.md).
+Extra notes (shadow DOM evidence, API discovery, debugging log) live in [NOTES.md](./NOTES.md). How the framework is layered, in which order a run happens and where results go is in [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md), with diagrams.
 
 ---
 
@@ -18,7 +18,7 @@ Extra notes (shadow DOM evidence, API discovery, debugging log) live in [NOTES.m
 - [Email verification code on login](#email-verification-code-on-login-part-cb)
 - [Test data strategy](#test-data-strategy)
 - [CI](#ci)
-- [Things that depend on your org](#things-that-depend-on-your-org)
+- [Things that depend on the org](#things-that-depend-on-the-org)
 - [Troubleshooting](#troubleshooting)
 
 ---
@@ -27,7 +27,8 @@ Extra notes (shadow DOM evidence, API discovery, debugging log) live in [NOTES.m
 
 ```
 playwright.config.ts        projects, reporters, timeouts
-.env                        your settings, not committed (see Setup, step 3)
+.nvmrc                      Node version (22), see Setup
+.env                        settings, not committed (see Setup, step 3)
 src/
   config/env.ts             env loading, one place for org-specific values
   utils/
@@ -47,44 +48,50 @@ src/
     conversionAssertions.ts asserts on the response
   fixtures/index.ts         page objects as fixtures
 tests/
-  auth.setup.ts             login + session cache (runs before everything else)
-  shared-data.setup.ts      creates the shared Account / Contact once, reuses them afterwards
-  login.spec.ts             Part A
-  lead.spec.ts              Part B - create / validate / edit
-  leadData.spec.ts          Part B - data variations: odd names, long names, every Lead Source
-  leadConversion.spec.ts    Part B - conversion (3 branches) + API validation
-  negative.spec.ts          Part B - negative scenarios
-  fresh-login.spec.ts       opt-in, full login with email code
-  signup.spec.ts            opt-in, developer signup form
+  setup/
+    auth.setup.ts           login + session cache (runs before everything else)
+    shared-data.setup.ts    creates the shared Account / Contact once, reuses them afterwards
+  auth/
+    login.spec.ts           Part A
+    fresh-login.spec.ts     opt-in, full login with email code
+    signup.spec.ts          opt-in, developer signup form
+  leads/
+    lead.spec.ts            Part B - create / validate / edit
+    leadData.spec.ts        Part B - data variations: odd names, long names, every Lead Source
+    negative.spec.ts        Part B - negative scenarios
+  conversion/
+    leadConversion.spec.ts  Part B - conversion (3 branches) + API validation
   unit/utils.spec.ts        offline tests for the helpers
+docs/
+  ARCHITECTURE.md           layers, project order and the flow of a run, with diagrams
+  evidence/                 DevTools screenshot for NOTES.md
 ```
 
 ## Setup
 
-We need Node 20+ (I used 22) and a Gmail account (or any IMAP mailbox, see below).
+We need Node 20+ (I used 22; the version is pinned in `.nvmrc`, and `engines` in `package.json` requires 20 or newer) and a Gmail account (or any IMAP mailbox, see below).
 
 ```bash
 git clone <this repo>
 cd sf-qa-automation
 npm install
 npx playwright install chromium webkit
-# then create your .env file, see step 3 below
+# then create .env file, see step 3 below
 ```
 
 Works on Windows, macOS and Linux. The npm scripts that set an environment variable go through `cross-env`, so they run in PowerShell and cmd as well.
 
 ### 1. Get a developer org (once)
 
-Go to https://developer.salesforce.com/signup. If you want the form filled for you:
+Go to https://developer.salesforce.com/signup. If willing to the form filled:
 
 ```bash
 npm run signup:fill                    # fills the form, does not submit
-SF_SIGNUP_SUBMIT=1 npm run signup:fill # submits too, you deal with the bot check by hand
+SF_SIGNUP_SUBMIT=1 npm run signup:fill # submits too
 ```
 
-I don't automate the bot check on purpose. Activation (the "set your password" link in the email) is done manually, once, as the brief allows.
+Activation (the "set the password" link in the email) is done manually, once.
 
-Tip: sign up with a plus address of your mailbox (`you+sfdev@gmail.com`). The verification mails then land in the inbox the framework already reads.
 
 ### 2. Mailbox for the verification code
 
@@ -94,27 +101,27 @@ For Gmail: turn on 2-step verification, then create an **App Password** (Google 
 
 ### 3. Create `.env`
 
-Create a file called `.env` in the project root. It is gitignored, never commit it. This is every setting the framework reads, with placeholder values:
+Create a file called `.env` in the project root. It is gitignored, not to commit it. This is every setting the framework reads, with placeholder values:
 
 ```ini
 # ---- Org ----
-# the lightning domain you land on after logging in manually, no trailing slash
-SF_LIGHTNING_URL=https://your-org-dev-ed.develop.lightning.force.com
+# the lightning domain land on after logging in manually, no trailing slash
+SF_LIGHTNING_URL=https://the-org-dev-ed.develop.lightning.force.com
 SF_LOGIN_URL=https://login.salesforce.com
-SF_USERNAME=you@example.com
-SF_PASSWORD=change-me
+SF_USERNAME=user***@example.com
+SF_PASSWORD=*********
 
 # ---- Mailbox for the email verification code ----
-# Gmail: turn on 2FA, then create an App Password (16 chars). Do NOT use your real password.
+# Gmail: turn on 2FA, then create an App Password (16 chars). Do NOT use real password.
 MAIL_IMAP_HOST=imap.gmail.com
 MAIL_IMAP_PORT=993
-MAIL_USER=you@gmail.com
-MAIL_APP_PASSWORD=abcdefghijklmnop
+MAIL_USER=user***@gmail.com
+MAIL_APP_PASSWORD=**************
 OTP_TIMEOUT_MS=90000
 
 # ---- Org specific expectations ----
 SF_SALES_APP_NAME=Sales
-# standard lead statuses. Some newer dev orgs ship with Unqualified/Qualified instead
+# standard lead statuses. 
 LEAD_STATUS_INITIAL=Open - Not Contacted
 LEAD_STATUS_UPDATED=Working - Contacted
 OPP_EXPECTED_STAGE=Prospecting
@@ -125,7 +132,7 @@ LOG_LEVEL=info
 SESSION_MAX_AGE_HOURS=10
 ```
 
-The important ones: `SF_LIGHTNING_URL` (the `...lightning.force.com` address you land on after logging in; only its origin is used, so pasting a full page url is fine), `SF_LOGIN_URL` (your My Domain login address if you have one), `SF_USERNAME`, `SF_PASSWORD`, `MAIL_USER`, `MAIL_APP_PASSWORD`. Everything else has a default.
+The important ones: `SF_LIGHTNING_URL` (the `...lightning.force.com` address to land on after logging in; only its origin is used, so pasting a full page url is fine), `SF_LOGIN_URL` (user's My Domain login address if have one), `SF_USERNAME`, `SF_PASSWORD`, `MAIL_USER`, `MAIL_APP_PASSWORD`. Everything else has a default.
 
 ## Running the tests
 
@@ -133,10 +140,23 @@ The important ones: `SF_LIGHTNING_URL` (the `...lightning.force.com` address you
 npm test                  # everything that is part of the normal suite (see projects below)
 npm run test:chromium     # full suite, chromium only
 npm run test:smoke        # @smoke tests on chromium + webkit
+npm run test:regression   # everything tagged @regression, chromium only
+npm run test:negative     # only the tests that expect Salesforce to refuse something
 npm run test:headed       # watch it work
 npm run test:unit         # offline helper tests, no org needed
 npm run test:fresh-login  # full login incl. email code, no cached session
 ```
+
+Tests carry tags (Playwright's `{ tag: [...] }` option, set on the `describe` block), so a slice of the suite can be selected with `--grep`:
+
+| tag | what it selects | where |
+|---|---|---|
+| `@smoke` | the fast check that the session and lead creation work. Runs on Chromium and WebKit | `login.spec`, `lead.spec` |
+| `@regression` | the whole functional suite (setup and opt-in specs are not part of it) | all of `auth/login`, `leads/`, `conversion/` |
+| `@negative` | tests where Salesforce is expected to refuse something | `negative.spec` |
+| `@data` | data variations (odd names, maximum lengths, every Lead Source) | `leadData.spec` |
+
+A test can carry several tags, and `--grep "@smoke|@negative"` selects either. Tags are not written into the test titles, so a title stays stable when the tags change.
 
 Run a single test: `npx playwright test -g "account and contact exist" --project=chromium`.
 
@@ -159,13 +179,13 @@ The seed is also written to `logs/run.log` (`random data seed (TEST_SEED)`) and 
 
 Playwright projects:
 
-| project | what it does |
+| Project | Purpose |
 |---|---|
 | `setup-chromium` / `setup-webkit` | log in (if the cached session is no good) and write `auth/state.<engine>.json` |
 | `seed-shared` | creates (once) the Account and Contact the "already exists" conversion scenarios link to, stores their ids in `auth/shared-data.json` |
 | `chromium` | the full suite, uses the cached session, runs after `seed-shared` |
 | `webkit-smoke` | only tests tagged `@smoke`, uses the webkit session |
-| `fresh-login`, `signup` | opt-in, skipped unless you start them via the npm scripts |
+| `fresh-login`, `signup` | opt-in, skipped unless it is started via the npm scripts |
 | `unit` | offline helper tests |
 
 The first run does a real login, so it takes longer (and fetches the email code). After that the cached session is reused until it expires or stops working.
@@ -176,13 +196,13 @@ For more detail in `logs/run.log` set `LOG_LEVEL=debug` in `.env`. It adds the f
 
 `npm test` reports 2 skipped tests. Those are `fresh-login` and `signup`, which are opt-in on purpose.
 
-## Viewing the report
+## View Test Report
 
 ```bash
 npm run report            # opens playwright-report/ in the browser
 ```
 
-What you get after a run:
+Test Run Outcome:
 
 - `playwright-report/index.html` - HTML report with steps, attachments (lead data, convert response JSON), traces on retry, screenshots + video for failures
 - `test-results/report.json` and `test-results/junit.xml` - for tooling
@@ -206,9 +226,9 @@ Open an earlier report with `npx playwright show-report runs/<folder>/playwright
 
 The two login tests (`auth.setup` and `fresh-login`) never record a trace. A trace stores what was typed and the request bodies, which would put the Salesforce password and the email code in a file that is easy to pass around. Their screenshots and videos show the password field masked.
 
-Nothing deletes old runs, so the folder grows; delete the old folders you no longer need (and their lines in `index.csv`). `runs/` is gitignored like the rest of the output, so none of it leaves your machine. A run that executes nothing (`--list`) is not archived.
 
-### What is recorded for each run
+
+### Recorded for each run
 
 Each run's `test-data.json` has the run (start, duration, status, the seed, the command line, which projects ran), the totals, and for every test its status, duration, annotations and the data it used:
 
@@ -294,22 +314,10 @@ If this were a team setup I'd probably move to the disposable-inbox API (per-run
 
 `.github/workflows/playwright.yml` type-checks, installs browsers, runs chromium + webkit smoke, and uploads the report. It is started by hand (Actions tab > playwright > Run workflow) rather than on every push, because it fails until the repository secrets exist; add `push:` / `pull_request:` to its `on:` block once they do. Secrets needed: `SF_LIGHTNING_URL`, `SF_USERNAME`, `SF_PASSWORD`, `MAIL_USER`, `MAIL_APP_PASSWORD`. A fresh runner has no cached session, so the pipeline goes through the verification-code path every time. It has no `auth/shared-data.json` either, so every CI run creates a new shared Account / Contact (same fixed name) and the two "already exists" scenarios wait for the search index like a first local run. Caching `auth/shared-data.json` between runs would avoid that; I have not set it up.
 
-## Things that depend on org
-
-Developer orgs are not all identical, so a few expectations are configurable:
-
-- Lead status values. The defaults are `Open - Not Contacted` / `Working - Contacted`; some newer orgs ship `Unqualified` / `Qualified` instead. Set `LEAD_STATUS_INITIAL` / `LEAD_STATUS_UPDATED`. If a value doesn't exist the error message lists the options that are on screen.
-- First opportunity stage after conversion (`OPP_EXPECTED_STAGE`, default `Prospecting`).
-- Duplicate detection. The duplicate-lead test skips itself (and says why in the report) if the org has no active lead duplicate rule.
-- Address fields on the lead are not filled in. The compound address component is its own can of worms and I decided it wasn't worth the flakiness for this scope.
-- The conversion modal's exact markup is the part of Lightning I'd expect to change between releases; all of it is isolated in `LeadConvertPage.ts`.
-- How the verification code is delivered (email or SMS) depends on the user, see Setup, step 2.
-- How long a new record takes to show up in search. In my dev org it was 45 s to over 2 minutes; the allowance is `INDEX_WINDOW_MS` in `src/utils/sharedData.ts`.
-- Duplicate rules decide whether the alert shows up while typing or on Save. The code handles both.
 
 ## Troubleshooting
 
-| what you see | what it means |
+| what is seen | what it means |
 |---|---|
 | `'cross-env' is not recognized` | dependencies are not installed (or were installed before `cross-env` was added): run `npm install` |
 | The verification page says the code was **texted** | the user has a verified mobile number, see Setup, step 2 |
@@ -322,7 +330,7 @@ Developer orgs are not all identical, so a few expectations are configurable:
 Starting clean:
 
 - Delete `auth/state.*.json` to force a fresh login (and a new email code).
-- Delete `auth/shared-data.json` to have the shared Account / Contact created again. Delete the old `QA_AUTO Shared Existing Account` in the org first, or you end up with two of them.
+- Delete `auth/shared-data.json` to have the shared Account / Contact created again. Delete the old `QA_AUTO Shared Existing Account` in the org first, or will end up with two of them.
 
 Debugging a test:
 
@@ -330,7 +338,8 @@ Debugging a test:
 npx playwright test --headed --debug
 npx playwright test --ui
 npx playwright show-trace test-results/<test>/trace.zip     # traces are recorded on retry, use --trace on to force it
-npx playwright codegen <your lightning url> --load-storage=auth/state.chromium.json
+npx playwright codegen <the lightning url> --load-storage=auth/state.chromium.json
 ```
 
-Every test keeps a screenshot, a video and a trace in `test-results/<test>/` (failed tests also an `error-context.md` with the page snapshot), unless you set `ARTIFACTS=failures`.
+Every test keeps a screenshot, a video and a trace in `test-results/<test>/` (failed tests also an `error-context.md` with the page snapshot), unless set `ARTIFACTS=failures`.
+

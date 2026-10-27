@@ -1,5 +1,5 @@
-import { env } from '../src/config/env';
-import { expect, test } from '../src/fixtures';
+import { env } from '../../src/config/env';
+import { expect, test } from '../../src/fixtures';
 import {
   buildLead,
   LeadData,
@@ -9,7 +9,7 @@ import {
   MAX_LAST_NAME,
   nameOfLength,
   uniqueSuffix,
-} from '../src/utils/randomData';
+} from '../../src/utils/randomData';
 
 /**
  * Data variations the other specs don't touch: names that need escaping or are as long as the field
@@ -47,7 +47,7 @@ const variations: Variation[] = [
   },
 ];
 
-test.describe('Part B - lead data variations', () => {
+test.describe('PartB-lead data variations', { tag: ['@data', '@regression'] }, () => {
   for (const v of variations) {
     test(`create a lead with ${v.title}`, async ({ home, leads }, testInfo) => {
       const lead = v.make(uniqueSuffix());

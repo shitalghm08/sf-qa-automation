@@ -69,7 +69,7 @@ export const env = {
     return optional('LEAD_STATUS_UPDATED', 'Working - Contacted');
   },
   get expectedOppStage() {
-    // first stage of the default sales process; change it if your org differs
+    // first stage of the default sales process; change it if the org differs
     return optional('OPP_EXPECTED_STAGE', 'Prospecting');
   },
 

@@ -1,9 +1,9 @@
 import { expect, test } from '@playwright/test';
-import { HomePage } from '../src/pages/HomePage';
+import { HomePage } from '../../src/pages/HomePage';
 
 // storageState comes from the project config (auth.setup.ts has already run by now)
-test.describe('Part A - login with cached session', () => {
-  test('lands on lightning home with app launcher and global search @smoke', async ({ page }) => {
+test.describe('PartA-login with cached session', { tag: ['@smoke', '@regression'] }, () => {
+  test('lands on lightning home with app launcher and global search', async ({ page }) => {
     const home = new HomePage(page);
 
     await test.step('open the org home page using the cached session', async () => {

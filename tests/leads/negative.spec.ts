@@ -1,8 +1,8 @@
-import { expect, test } from '../src/fixtures';
-import { env } from '../src/config/env';
-import { buildLead } from '../src/utils/randomData';
+import { expect, test } from '../../src/fixtures';
+import { env } from '../../src/config/env';
+import { buildLead } from '../../src/utils/randomData';
 
-test.describe('Negative scenarios - leads', () => {
+test.describe('Negative scenarios - leads', { tag: ['@negative', '@regression'] }, () => {
   test.beforeEach(async ({ home }) => {
     await home.goto();
     await home.openApp(env.salesAppName);

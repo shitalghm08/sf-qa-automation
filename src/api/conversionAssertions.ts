@@ -14,7 +14,7 @@ interface Expected {
 /**
  * Checks the backend response for the convert click against what the UI showed.
  *
- * I don't hardcode json paths (the aura payload shape isn't documented and differs between
+ * Did not hardcode json paths (the aura payload shape isn't documented and differs between
  * releases). Instead each id is searched for anywhere in the response and the path where it
  * was found is reported, so the paths can be pinned down in NOTES.md after looking at a real run.
  */

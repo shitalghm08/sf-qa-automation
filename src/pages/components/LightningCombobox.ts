@@ -6,7 +6,7 @@ import { esc, looseLabel } from '../BasePage';
  *
  * Why this exists: the visible "dropdown" is a <button role="combobox"> living
  * inside nested shadow roots, its ids are generated at render time and the label
- * is wired with ids that don't survive a re-render. So I never touch ids or css
+ * is wired with ids that don't survive a re-render. So, never touch ids or css
  * classes - only role + accessible name, which Playwright resolves through open
  * shadow roots. Options are matched by role=option and by the data-value that
  * lightning-base-combobox-item puts on each row.

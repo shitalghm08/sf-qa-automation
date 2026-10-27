@@ -103,18 +103,39 @@ The ids in the response equal the ids the confirmation dialog showed, and the "e
 
 ---
 
-## Known fragile spots
+## Observations and assumptions
 
-These are the parts of the Lightning UI I expect to move between releases, so they are kept in one place each:
+### Observations
 
-| area | where |
-|---|---|
-| conversion modal markup (existing vs new lookups, confirmation dialog) | `LeadConvertPage.ts` |
-| validation / duplicate banner wording | `LeadPage.ts` (`validationSummary`, `duplicateAlert`) |
-| login + verification page elements | `LoginPage.ts` |
-| picklists | `LightningCombobox.ts` |
-| lookups (search-all row, dropdown that closes) | `LightningLookup.ts` |
-| shared Account / Contact and how long search takes to see them | `sharedData.ts`, `shared-data.setup.ts` |
+All observed from runs against the developer org.
+
+1. The login is username-first: the password field appears only after the first Log In click.
+2. The verification code was sent by SMS, not email, because the user had a verified mobile number. The mailbox reader cannot see SMS; removing the number in the org fixed it.
+3. Record URLs omit the object name: `/lightning/r/<id>/view`.
+4. While a popover ("We hit a snag", "Similar Records Exist") is open, Lightning removes the form from the accessibility tree, so role locators cannot see it.
+5. Duplicate detection runs while the form is being filled. The rule only warns, and the Save button then reads "Save (Ignore Alert)".
+6. The Convert Lead modal is radio-based (Create New / Choose Existing, each with a search box), and its dropdown contains a "Search for matching ..." row that is not a record.
+7. New records took 45 s to over 2 minutes to become searchable, so the "already exists" scenarios use one shared Account and Contact.
+8. The conversion call is `POST /aura` with the `convertLeadServer` action. The ids sit at `$.actions[N].returnValue.*`, the response has no stage field, and Lightning's telemetry call also mentions "convert".
+9. Generated picklist ids change on every open (`851`, `852`, `1111`, ...). CSS and XPath each match all 7 picklists on the form; role plus accessible name matches exactly one.
+10. Lightning re-renders close open menus and dropdowns (a page refresh, or scrolling a modal). Retrying open and click as one unit fixed it. WebKit was slower and needed 30 s timeouts.
+
+### Assumptions
+
+| # | assumption | outcome |
+|---|---|---|
+| 1 | The classic one-page login ids (`#username`, `#password`, `#Login`) apply | Wrong: the login is username-first |
+| 2 | The verification code arrives by email | Wrong for this org: SMS, until the mobile number was removed |
+| 3 | XPath cannot cross shadow DOM | Wrong in Playwright 1.64: it reaches into shadow roots |
+| 4 | The Convert modal has a single lookup with a "New ..." option | Wrong: radio-based layout |
+| 5 | Freshly created records are searchable at once | Wrong: search-index lag |
+| 6 | Lead statuses are Unqualified / Qualified | Wrong for this org: Open - Not Contacted / Working - Contacted |
+| 7 | The first opportunity stage after conversion is Prospecting | Held in every conversion run |
+| 8 | The default Lead Source values exist, and the standard field limits (40, 80, 255) apply | Held: all five values and the maximum-length test passed |
+| 9 | One shared Account and Contact can be reused indefinitely | Unverified over time: it accumulates converted contacts and opportunities |
+| 10 | The CI workflow works once the five secrets exist | Unverified: it has never been run |
+
+The five-minute search-index allowance in `src/utils/sharedData.ts` rests on only a few observations (45 s to over 2 minutes).
 
 ---
 

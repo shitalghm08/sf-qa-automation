@@ -1,9 +1,9 @@
-import { env } from '../src/config/env';
-import { expect, test } from '../src/fixtures';
-import { assertConversionResponse } from '../src/api/conversionAssertions';
-import { LinkMode } from '../src/pages/LeadConvertPage';
-import { buildLead, fullName } from '../src/utils/randomData';
-import { readSharedIds, searchPatienceMs, SHARED } from '../src/utils/sharedData';
+import { env } from '../../src/config/env';
+import { expect, test } from '../../src/fixtures';
+import { assertConversionResponse } from '../../src/api/conversionAssertions';
+import { LinkMode } from '../../src/pages/LeadConvertPage';
+import { buildLead, fullName } from '../../src/utils/randomData';
+import { readSharedIds, searchPatienceMs, SHARED } from '../../src/utils/sharedData';
 
 /**
  * Lead -> Opportunity conversion, once per branch of the account / contact check.
@@ -31,7 +31,7 @@ const scenarios: Scenario[] = [
   { title: 'account and contact exist, both linked', existingAccount: true, existingContact: true },
 ];
 
-test.describe('Part B - lead to opportunity conversion', () => {
+test.describe('PartB-lead to opportunity conversion', { tag: ['@regression'] }, () => {
   // only the very first run, with brand new shared records, may wait minutes for the search index
   test.describe.configure({ timeout: 480_000 });
 

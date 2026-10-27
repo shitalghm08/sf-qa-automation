@@ -4,7 +4,7 @@ import * as path from 'path';
 /**
  * The "already exists" Account and Contact for the conversion scenarios.
  *
- * They are created once (tests/shared-data.setup.ts) and reused by every run, instead of seeding
+ * They are created once (tests/setup/shared-data.setup.ts) and reused by every run, instead of seeding
  * fresh ones per test. Reason: the Convert Lead modal looks existing records up through the search
  * index, and a record created seconds ago takes anywhere from under a minute to over two minutes to
  * show up there. A record that is minutes or days old is found at once.
